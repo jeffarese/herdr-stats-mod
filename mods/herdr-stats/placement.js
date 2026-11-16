@@ -12,10 +12,16 @@ export const SPOTS = [
   { id: "float", label: "Floating drawer", about: "Peeks from the right edge", icon: "float" },
 ];
 
-// Ids of the blocks this mod adds, and of the rows/columns it wraps around
-// something else to make room (taken apart again when the block goes).
+// Ids of the blocks this mod adds, and of the rows it wraps around a bar to make
+// room (taken apart again when the block goes). `stats-wrap-right` is what older
+// versions wrapped a right-edge panel in; it is still taken apart.
 const BLOCK_ID = { left: "stats-left", right: "stats-right", status: "stats-status", tabs: "stats-tabs", float: "stats-float" };
 const WRAP_ID = { right: "stats-wrap-right", status: "stats-wrap-status", tabs: "stats-wrap-tabs" };
+
+// Sidebars belong to the layout, not to a mod: the right one is a column every
+// panel there shares (the stats, the pull requests, a board), so folding it
+// folds them together. It stays while any panel is in it.
+const RIGHT_SIDEBAR = "sidebar-right";
 
 // Sizes as designed at zoom 1. The panel fits its rows to whatever height it gets.
 // left: the panel's height with the six default readings (views.panelHeight), so none is cut.
@@ -102,10 +108,11 @@ function insertRight(root) {
     return root;
   }
   if (last && last.type === "block" && !last.content?.tab && last.id !== BLOCK_ID.left) {
-    // A panel already on the right edge (a PR list, a board): stack the stats under it.
+    // A panel alone on the right edge (a PR list, a board): it and the stats share a
+    // right sidebar, at the panel's width.
     const { size, min, max, ...rest } = last;
     root.children[root.children.length - 1] = {
-      id: WRAP_ID.right,
+      id: RIGHT_SIDEBAR,
       type: "column",
       ...(size ? { size } : {}),
       ...(min !== undefined ? { min } : {}),
@@ -115,8 +122,16 @@ function insertRight(root) {
     };
     return root;
   }
-  // Nothing on the right yet: the stats get a column of their own.
-  root.children.push({ ...block("right", { px: SIZES.tall }), min: 44, max: 520 });
+  // Nothing on the right yet: a right sidebar with the stats in it, for other panels to join.
+  root.children.push({
+    id: RIGHT_SIDEBAR,
+    type: "column",
+    size: { px: SIZES.tall },
+    min: 44,
+    max: 520,
+    divider: { width: 1, color: "border" },
+    children: [block("right", { weight: 1 })],
+  });
   return root;
 }
 
@@ -201,8 +216,16 @@ export function removeSpot(layout, spot) {
   for (const { node, parent } of doomed) {
     parent.children.splice(parent.children.indexOf(node), 1);
     unwrap(root, parent);
+    dropEmptySidebar(root, parent);
   }
   return root;
+}
+
+// The right sidebar goes with its last panel; with other panels in it, it stays theirs.
+function dropEmptySidebar(root, column) {
+  if (column.id !== RIGHT_SIDEBAR || column.children.length) return;
+  const hit = findNode(root, (n) => (n.children ?? []).includes(column));
+  if (hit) hit.node.children.splice(hit.node.children.indexOf(column), 1);
 }
 
 // A wrapper this mod made, now down to the one thing it wrapped: put that thing back as it was.

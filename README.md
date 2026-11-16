@@ -61,7 +61,7 @@ readings, shared by every place.
 | Place | What you get |
 | --- | --- |
 | **Left sidebar** | A panel under Herdr's lists: a line per reading with its chart, then the busiest terminal. Folded narrow, it becomes a column of figures. |
-| **Right sidebar** | Stacked under a panel already on the right (a PR list, say), or a column of its own. With that much height it shows the dashboard's sections, one under another. |
+| **Right sidebar** | Joins the right sidebar, a `sidebar-right` column every panel there shares (a PR list, say), under what's already in it; with nothing there it starts one. Folding the sidebar to a rail folds every panel in it, so the stats show their rail too. With that much height it shows the dashboard's sections, one under another. |
 | **Status bar** | One line at the right end of the status bar. What doesn't fit is left out from the end of your list. |
 | **Tab bar** | The same line at the end of the tab bar. |
 | **Floating drawer** | Figures peek from the window's edge; hover and the charts slide out. Drag it to any edge. |

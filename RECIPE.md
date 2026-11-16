@@ -59,10 +59,14 @@ so they don't jitter; labels in the UI font. Chart tracks are `foreground` at 9%
 - Agent status does not change the stats; terminals are named from `agents()`, `panes()` and
   `terminals()` (program name, "space › tab", the title without its status glyph).
 - **Show in…** edits the shown layout with `layout.set`: the left spot inserts a block above the
-  sidebar's footer; right stacks under a block already on the right edge (wrapping it in a
-  column) or adds a block of its own; status and tabs wrap that bar in a row with the stats at
-  its end; float adds a `floating` entry (right edge, end, peek 58). Taking a spot out restores
-  the layout exactly, unwrapping what it wrapped. On one of Herdr's own layouts (from
+  sidebar's footer; right joins the right sidebar, a column the layout owns and every panel
+  there shares (`sidebar-right`, or any column already at the right edge): at its foot, or, when
+  a panel is alone at the edge, in a new `sidebar-right` holding both at the panel's width, or,
+  with nothing there, in a new `sidebar-right` of its own; status and tabs wrap that bar in a row
+  with the stats at its end; float adds a `floating` entry (right edge, end, peek 58). Taking a
+  spot out restores the layout exactly, unwrapping what it wrapped, except that a right sidebar
+  stays while another panel is in it (it goes with its last one). `stats-wrap-right`, what older
+  versions wrapped a right-edge panel in, is still taken apart. On one of Herdr's own layouts (from
   `installed.json`) the first pick runs `layout.clone {as: "<name>-stats"}` first. Readings live
   in `shared("herdr-stats.metrics")`; changing them resizes a sidebar panel to fit.
 

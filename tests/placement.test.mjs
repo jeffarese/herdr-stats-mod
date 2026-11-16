@@ -29,6 +29,8 @@ test("left: under the lists, above the sidebar's footer", () => {
 test("every spot comes out exactly as it went in", () => {
   for (const fixture of [main, prs]) {
     for (const spot of place.SPOTS.map((s) => s.id)) {
+      // A panel alone at the right edge keeps the sidebar it now shares (see below).
+      if (fixture === prs && spot === "right") continue;
       const before = fixture();
       const added = place.addSpot(before, spot);
       assert.ok(added, `${spot} can be added`);
@@ -39,23 +41,43 @@ test("every spot comes out exactly as it went in", () => {
   }
 });
 
-test("right: a panel already on the right edge gets the stats stacked under it", () => {
+test("right: a panel alone on the right edge and the stats share a right sidebar", () => {
   const out = place.addSpot(prs(), "right");
   const last = out.children.at(-1);
-  assert.equal(last.id, "stats-wrap-right");
+  assert.equal(last.id, "sidebar-right", "the sidebar is the layout's, not named after either mod");
   assert.equal(last.type, "column");
   assert.deepEqual(last.size, { px: 340 }, "the column keeps the panel's width");
   assert.equal(last.min, 44);
   assert.deepEqual(last.children.map((c) => c.id), ["prs", "stats-right"]);
   assert.deepEqual(last.children[0].size, { weight: 1 });
+  assert.equal(last.children[0].min, undefined, "the panel's width limits moved to the sidebar");
+  const back = place.removeSpot(out, "right");
+  assert.deepEqual(back.children.at(-1).children.map((c) => c.id), ["prs"], "the sidebar stays the panel's");
+  assert.deepEqual(back.children.at(-1).size, { px: 340 });
 });
 
-test("right: with nothing on the right, the stats get a column of their own", () => {
+test("right: with nothing on the right, the stats start a right sidebar others can join", () => {
   const out = place.addSpot(main(), "right");
   const last = out.children.at(-1);
-  assert.equal(last.id, "stats-right");
-  assert.equal(last.type, "block");
+  assert.equal(last.id, "sidebar-right");
+  assert.equal(last.type, "column");
+  assert.deepEqual(last.children.map((c) => c.id), ["stats-right"]);
+  assert.deepEqual(last.children[0].size, { weight: 1 }, "alone, the stats fill it");
   assert.equal(out.children.length, main().children.length + 1);
+  assert.deepEqual(place.removeSpot(out, "right"), main(), "the sidebar goes with its last panel");
+});
+
+test("right: a right sidebar that holds other panels gets the stats at its foot", () => {
+  const out = place.addSpot(place.addSpot(prs(), "right"), "left");
+  const again = place.addSpot(place.removeSpot(out, "right"), "right");
+  assert.deepEqual(again.children.at(-1).children.map((c) => c.id), ["prs", "stats-right"]);
+  assert.equal(again.children.at(-1).id, "sidebar-right", "joined, not wrapped twice");
+});
+
+test("right: the wrapper older versions made is still taken apart", () => {
+  const old = place.addSpot(prs(), "right");
+  old.children.at(-1).id = "stats-wrap-right";
+  assert.deepEqual(place.removeSpot(old, "right"), prs());
 });
 
 test("status and tabs: the bar and the stats share a row, the bar keeps its height", () => {

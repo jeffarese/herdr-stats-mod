@@ -22,6 +22,8 @@ MOD = "herdr-stats"
 ACTION = f"mod.open:{MOD}"
 KEY = "cmd-alt-s"
 WRAPS = {"stats-wrap-right", "stats-wrap-status", "stats-wrap-tabs"}
+# The right sidebar is the layout's, shared by every panel in it: it goes only when it is empty.
+SIDEBAR = "sidebar-right"
 
 
 def write_json(path, value):
@@ -83,6 +85,9 @@ def strip(node):
                     only[k] = child[k]
             child = only
             changed = True
+        if child.get("id") == SIDEBAR and child.get("type") == "column" and not child.get("children"):
+            changed = True
+            continue
         kept.append(child)
     node["children"] = kept
     return changed

@@ -5,7 +5,7 @@ import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, existsSync, rmSync
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { execFileSync, spawn } from "node:child_process";
-import { addSpot, SPOTS } from "../mods/herdr-stats/placement.js";
+import { addSpot, removeSpot, SPOTS } from "../mods/herdr-stats/placement.js";
 
 const SCRIPT = new URL("../scripts/install.py", import.meta.url).pathname;
 const MAIN = JSON.parse(readFileSync(new URL("./fixtures/layout-main.json", import.meta.url), "utf8"));
@@ -62,7 +62,9 @@ test("layouts: --remove takes the stats out of every personal layout, exactly as
     writeFileSync(join(home, "layouts", "main.json"), JSON.stringify(herdrs));
     py(home, "layouts", "remove");
     assert.deepEqual(json(join(home, "layouts", "mine.json")), MAIN);
-    assert.deepEqual(json(join(home, "layouts", "prs.json")), PRS);
+    // The pull requests keep the right sidebar they came to share with the stats.
+    assert.deepEqual(json(join(home, "layouts", "prs.json")), removeSpot(addSpot(PRS, "right"), "right"));
+    assert.equal(json(join(home, "layouts", "prs.json")).children.at(-1).id, "sidebar-right");
     assert.deepEqual(json(join(home, "layouts", "main.json")), herdrs);
     assert.ok(existsSync(join(home, "layouts", "mine.json.before-stats")), "the old file is kept");
   } finally {
