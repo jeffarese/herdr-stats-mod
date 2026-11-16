@@ -18,7 +18,7 @@ jobs:
       - run: python3 -m py_compile scripts/install.py
       - run: node -e "for (const f of ['keys.json', 'package.json', 'mods/herdr-stats/mod.json']) JSON.parse(require('fs').readFileSync(f, 'utf8'))"
   sampler-macos:
-    runs-on: macos-14
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
       - run: cargo test --release --manifest-path sampler/Cargo.toml

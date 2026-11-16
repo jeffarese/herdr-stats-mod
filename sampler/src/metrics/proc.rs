@@ -340,11 +340,13 @@ mod tests {
         let mut c = ProcCollector::new();
         let me = std::process::id() as i32;
         c.sample([("w1:p1", me)]);
+        // Spin for a fixed time, not a fixed count: Linux counts CPU in 10 ms ticks, and an
+        // optimised loop can finish inside one.
+        let until = Instant::now() + Duration::from_millis(200);
         let mut acc = 0u64;
-        for i in 0..8_000_000u64 {
-            acc = acc.wrapping_add(i.wrapping_mul(2654435761));
+        while Instant::now() < until {
+            acc = std::hint::black_box(acc.wrapping_add(2654435761));
         }
-        std::hint::black_box(acc);
         let out = c.sample([("w1:p1", me)]);
         let usage = &out[0].1;
         assert!(
