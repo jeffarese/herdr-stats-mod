@@ -1,0 +1,21 @@
+{
+  "name": "herdr-stats-mod",
+  "version": "0.1.2",
+  "private": true,
+  "type": "module",
+  "description": "A Herdr app mod: this machine's CPU, memory, GPU, network, disk and temperatures, and which agent is using them",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jeffarese/herdr-stats-mod.git"
+  },
+  "engines": {
+    "node": ">=20.6"
+  },
+  "scripts": {
+    "test": "node --import ./tests/stubs/loader.mjs --test tests/*.test.mjs",
+    "test:sampler": "cargo test --release --manifest-path sampler/Cargo.toml",
+    "demo": "sh docs/demo/record.sh",
+    "build:sampler": "sh scripts/build-sampler.sh"
+  }
+}

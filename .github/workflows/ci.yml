@@ -1,0 +1,37 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  mod:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm test
+      - run: for f in install.sh scripts/build-sampler.sh docs/demo/*.sh; do sh -n "$f"; done
+      - run: python3 -m py_compile scripts/install.py
+      - run: node -e "for (const f of ['keys.json', 'package.json', 'mods/herdr-stats/mod.json']) JSON.parse(require('fs').readFileSync(f, 'utf8'))"
+  sampler-macos:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - run: cargo test --release --manifest-path sampler/Cargo.toml
+      - run: cargo build --release --manifest-path sampler/Cargo.toml && sampler/target/release/herdr-stats-sampler --once > /dev/null
+      # The committed binary is the one users get: it must be this source's version.
+      - name: Committed binary matches the source version
+        run: |
+          want="herdr-stats-sampler $(sed -n 's/^version = "\(.*\)"/\1/p' sampler/Cargo.toml | head -1)"
+          have=$(mods/herdr-stats/bin/herdr-stats-sampler --version)
+          [ "$have" = "$want" ] || { echo "bin is '$have', source is '$want': run scripts/build-sampler.sh"; exit 1; }
+      - run: cc -O2 -Wall -Werror -o /tmp/standin docs/demo/standin.c
+  sampler-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: cargo test --release --manifest-path sampler/Cargo.toml

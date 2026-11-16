@@ -1,0 +1,27 @@
+[package]
+name = "herdr-stats-sampler"
+version = "0.1.2"
+edition = "2021"
+rust-version = "1.80"
+description = "The sampler behind the herdr-stats mod: one small JSON snapshot of the machine per second"
+license = "MIT"
+repository = "https://github.com/jeffarese/herdr-stats-mod"
+
+[[bin]]
+name = "herdr-stats-sampler"
+path = "src/main.rs"
+
+[dependencies]
+libc = "0.2"
+serde_json = "1"
+
+[target.'cfg(target_os = "macos")'.dependencies]
+core-foundation-sys = "0.8"
+
+# It runs for as long as Herdr is open, so steady-state cost matters more than build time.
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+strip = "symbols"

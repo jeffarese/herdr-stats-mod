@@ -1,0 +1,9 @@
+.DS_Store
+sampler/target/
+# Written by the Herdr app into every mod folder.
+mods/*/gpui-kit.d.ts
+mods/*/herdr.d.ts
+mods/*/jsconfig.json
+mods/*/*.error
+node_modules/
+__pycache__/
