@@ -254,12 +254,13 @@ export default class Stats extends View {
     this.fitPanels();
   }
 
-  // A panel in a sidebar column grows or shrinks to the readings it now shows.
+  // The left panel grows or shrinks to the readings it now shows. Not the right one:
+  // it draws the scrolling column and shares its sidebar by weight (placement.js).
   fitPanels() {
     const tree = layout();
     const r = readings(this.feed?.snap ?? null);
     if (!r) return;
-    for (const spot of ["left", "right"]) {
+    for (const spot of ["left"]) {
       const id = blockId(spot);
       const hit = findNode(tree, (n) => n.id === id);
       if (!hit || hit.parent?.type !== "column" || hit.parent.children.length < 2) continue;
