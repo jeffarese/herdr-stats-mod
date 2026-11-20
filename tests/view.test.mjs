@@ -134,11 +134,18 @@ test("the strip fits what the width allows, in order", async () => {
   assert.deepEqual(ids(draw()).filter((i) => i.startsWith("strip-") && i !== "strip-menu"), ["strip-cpu"]);
 });
 
-test("the rail shows numbers without units where every column is precious", async () => {
+test("the rail shows each selected metric's icon above its compact value", async () => {
   const { draw } = await mount({ spot: "left" }, { width: 60, height: 500 });
+  world.shared["herdr-stats.metrics"] = ["cpu", "mem", "gpu", "net", "disk", "temp", "top"];
   const tree = draw();
-  assert.deepEqual(ids(tree).filter((i) => i.startsWith("rail-")), ["rail-cpu", "rail-mem", "rail-gpu", "rail-temp"]);
-  assert.match(text(byId(tree, "rail-cpu")), /^37 /);
+  const icons = { cpu: "cpu", mem: "memory", gpu: "gpu", net: "net", disk: "disk", temp: "temp", top: "terminal" };
+  assert.deepEqual(ids(tree).filter(id => id.startsWith("rail-")), Object.keys(icons).map(id => `rail-${id}`));
+  for (const [id, icon] of Object.entries(icons)) {
+    const cell = byId(tree, `rail-${id}`);
+    assert.equal(cell.kids[0].arg, `mods/herdr-stats/${icon}.svg`);
+    assert.ok(cell.tip);
+  }
+  assert.equal(text(byId(tree, "rail-cpu")), "37");
 });
 
 test("the dashboard lists terminals by CPU; arrows choose and enter goes there", async () => {
@@ -290,4 +297,15 @@ test("in a narrow column the terminal table keeps only CPU, so names have room",
   assert.match(narrow, /CPU/);
   assert.doesNotMatch(narrow, /Memory|Procs/);
   assert.match(text(terminalSection(ui, 420)), /Memory.*Procs/);
+});
+
+test("a short folded System panel keeps its expand button and accepts the width saved by a sibling", async () => {
+  const { draw, c } = await mount({ spot: "right" }, { width: 52, height: 48 });
+  world.layout.children.push({ id: "sidebar-right", type: "column", size: { px: 52 }, children: [
+    { id: "stats-right", content: { mod: "herdr-stats", props: { spot: "right" } } },
+  ] });
+  world.shared["sidebar.width.sidebar-right"] = 326;
+  assert.ok(byId(draw(), "rail-cpu"));
+  byId(draw(), "expand").handlers.on_click(null, c);
+  assert.deepEqual(world.runs.at(-1), ["layout.resize", { id: "sidebar-right", px: 326 }]);
 });
