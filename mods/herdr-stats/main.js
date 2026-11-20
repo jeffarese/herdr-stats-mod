@@ -2,6 +2,7 @@
 // terminal is using them. One mod, many looks: it reads where it was put (a
 // sidebar, a bar, a drawer, a dialog) and how much room it has, and draws to fit.
 
+import { sidebarButton } from "./sidebar-rail.js";
 import { View } from "gpui-kit";
 import {
   exec,
@@ -121,8 +122,8 @@ export default class Stats extends View {
     if (placement()) return "drawer";
     const spot = props()?.spot;
     if (spot === "status" || spot === "tabs") return "strip";
-    if (height < 64) return "strip";
     if (width < 150) return "rail";
+    if (height < 64) return "strip";
     if (width >= 640 && height >= 380) return "dashboard";
     if (height >= 440) return "column";
     return "panel";
@@ -254,12 +255,13 @@ export default class Stats extends View {
     this.fitPanels();
   }
 
-  // A panel in a sidebar column grows or shrinks to the readings it now shows.
+  // The left panel grows or shrinks to the readings it now shows. Not the right one:
+  // it draws the scrolling column and shares its sidebar by weight (placement.js).
   fitPanels() {
     const tree = layout();
     const r = readings(this.feed?.snap ?? null);
     if (!r) return;
-    for (const spot of ["left", "right"]) {
+    for (const spot of ["left"]) {
       const id = blockId(spot);
       const hit = findNode(tree, (n) => n.id === id);
       if (!hit || hit.parent?.type !== "column" || hit.parent.children.length < 2) continue;
@@ -292,7 +294,11 @@ export default class Stats extends View {
       });
     }
     const ui = this.ui(t);
-    switch (this.variant(ui.width, ui.height)) {
+    const variant = this.variant(ui.width, ui.height);
+    if (!this.view && !ui.placement && !["status", "tabs"].includes(ui.spot)) {
+      ui.fold = sidebarButton(MOD, ui.width);
+    }
+    switch (variant) {
       case "dashboard":
         return views.dashboard(ui);
       case "drawer":

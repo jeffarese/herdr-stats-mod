@@ -101,10 +101,13 @@ function insertLeft(root) {
   return root;
 }
 
+// In a right sidebar the stats always take a share (a weight), never a fixed height:
+// with a fixed height, hiding the panel beside them left them at that height with
+// the rest of the column empty, and their sections cut off by their own scroll.
 function insertRight(root) {
   const last = root.children[root.children.length - 1];
   if (last && last.type === "column" && !holdsTabs(last)) {
-    last.children.push(block("right", { px: SIZES.right }));
+    last.children.push(block("right", { weight: 1 }));
     return root;
   }
   if (last && last.type === "block" && !last.content?.tab && last.id !== BLOCK_ID.left) {
@@ -118,7 +121,7 @@ function insertRight(root) {
       ...(min !== undefined ? { min } : {}),
       ...(max !== undefined ? { max } : {}),
       divider: { width: 1, color: "border" },
-      children: [{ ...rest, size: { weight: 1 } }, block("right", { px: SIZES.right })],
+      children: [{ ...rest, size: { weight: 1 } }, block("right", { weight: 1 })],
     };
     return root;
   }

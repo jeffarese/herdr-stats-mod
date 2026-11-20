@@ -50,6 +50,7 @@ test("right: a panel alone on the right edge and the stats share a right sidebar
   assert.equal(last.min, 44);
   assert.deepEqual(last.children.map((c) => c.id), ["prs", "stats-right"]);
   assert.deepEqual(last.children[0].size, { weight: 1 });
+  assert.deepEqual(last.children[1].size, { weight: 1 }, "a share, so hiding the panel gives the stats the whole column");
   assert.equal(last.children[0].min, undefined, "the panel's width limits moved to the sidebar");
   const back = place.removeSpot(out, "right");
   assert.deepEqual(back.children.at(-1).children.map((c) => c.id), ["prs"], "the sidebar stays the panel's");
@@ -71,6 +72,7 @@ test("right: a right sidebar that holds other panels gets the stats at its foot"
   const out = place.addSpot(place.addSpot(prs(), "right"), "left");
   const again = place.addSpot(place.removeSpot(out, "right"), "right");
   assert.deepEqual(again.children.at(-1).children.map((c) => c.id), ["prs", "stats-right"]);
+  assert.deepEqual(again.children.at(-1).children[1].size, { weight: 1 }, "joins by weight, never a fixed height");
   assert.equal(again.children.at(-1).id, "sidebar-right", "joined, not wrapped twice");
 });
 

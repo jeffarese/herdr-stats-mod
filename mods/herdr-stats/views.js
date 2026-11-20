@@ -211,6 +211,7 @@ export function panel(ui) {
     .child(div().text_size(11.5).font_medium().text_color(t.dim).child("System"))
     .when(Boolean(ui.stale && r), (el) => el.child(div().text_size(10.5).text_color(t.dim).child("· paused")))
     .child(div().flex_1())
+    .when(ui.fold, el => el.child(ui.fold))
     .child(iconButton(ui, "open-dashboard", "expand", `Open the dashboard${ui.dashKey ? `  ${ui.dashKey}` : ""}`, () => ui.act.dashboard()))
     .child(iconButton(ui, "panel-menu", "more", "Show in… and readings", () => ui.act.menu()));
 
@@ -313,29 +314,33 @@ function sensorTip(r) {
 }
 
 // ---------------------------------------------------------------------------
-// The rail: the sidebar folded to icons. A value and a sliver of bar per reading.
+// The rail uses the panel's metric icons above their values.
 
 export function rail(ui) {
   const { t, r, mono } = ui;
   const items = [];
-  const add = (id, label, value, fraction, kind, level) =>
+  const add = (id, icon, value, fraction, kind, level, tip) =>
     items.push(
       v_flex()
         .id(`rail-${id}`)
-        .items_center()
+        .items_center().flex_none()
         .gap(3)
+        .role("button").accessibility_label(`${tip}, open System dashboard`).tooltip(tip)
         .cursor_pointer()
         .on_click(() => ui.act.dashboard())
+        .child(svg(ICON(icon)).size(13).flex_none().text_color(t.muted))
         .child(div().font_family(mono).text_size(10.5).text_color(textTone(t, level)).child(value))
-        .when(fraction !== null, (el) => el.child(bar(fraction, { width: 22, height: 3, color: tone(t, kind, level), track: track(t) })))
-        .child(div().text_size(9).text_color(t.dim).child(label)),
+        .when(fraction !== null, (el) => el.child(bar(fraction, { width: 22, height: 3, color: tone(t, kind, level), track: track(t) }))),
     );
   if (r) {
     for (const m of ui.metrics) {
-      if (m === "cpu") add("cpu", "cpu", pct(r.cpu.value).replace("%", ""), r.cpu.value, "cpu", r.cpu.level);
-      if (m === "mem" && r.mem) add("mem", "mem", bytes(r.mem.used, { compact: true }), r.mem.fraction, "mem", r.mem.level);
-      if (m === "gpu" && r.gpu) add("gpu", "gpu", pct(r.gpu.value).replace("%", ""), r.gpu.value, "gpu", r.gpu.level);
-      if (m === "temp" && r.temp?.headline) add("temp", "temp", degrees(r.temp.headline), null, "temp", r.temp.level);
+      if (m === "cpu") add("cpu", "cpu", pct(r.cpu.value).replace("%", ""), r.cpu.value, "cpu", r.cpu.level, cpuTip(r));
+      if (m === "mem" && r.mem) add("mem", "memory", bytes(r.mem.used, { compact: true }), r.mem.fraction, "mem", r.mem.level, `Memory · ${memTip(r.mem)}`);
+      if (m === "gpu" && r.gpu) add("gpu", "gpu", pct(r.gpu.value).replace("%", ""), r.gpu.value, "gpu", r.gpu.level, gpuTip(r.gpu));
+      if (m === "net" && r.net) add("net", "net", rate(r.net.rx, { compact: true }), null, "rx", "ok", `Network ↓ ${rate(r.net.rx)}  ↑ ${rate(r.net.tx)}`);
+      if (m === "disk" && r.disk) add("disk", "disk", pct(r.disk.fraction), r.disk.fraction, "disk", r.disk.level, `Disk · ${diskTip(r.disk)}`);
+      if (m === "top" && ui.top) add("top", "terminal", coreLoad(ui.top.cpu), null, "cpu", "ok", `Busiest terminal: ${ui.top.name} · ${coreLoad(ui.top.cpu)} CPU`);
+      if (m === "temp" && r.temp?.headline) add("temp", "temp", degrees(r.temp.headline), null, "temp", r.temp.level, `Temperature · ${sensorTip(r)}`);
     }
   }
   return v_flex()
@@ -345,12 +350,13 @@ export function rail(ui) {
     .border_t(1)
     .border_color(t.border)
     .items_center()
-    .pt(10)
-    .gap(10)
+    .min_h(0).pt(4)
+    .when(ui.fold, el => el.child(ui.fold))
     .on_size_change((size, cx) => ui.act.resized(size, cx))
-    .when(!r, (el) => el.child(div().size(6).rounded(3).bg(t.accent).loop("opacity", { from: 0.25, to: 1, period: 1200 })))
+    .when(!items.length, el => el.child(iconButton(ui, "rail-dashboard", "activity",
+      ui.problem?.text ?? (r ? "Open System dashboard" : "Reading the machine…"), () => ui.act.dashboard())))
     .when(ui.stale && Boolean(r), (el) => el.opacity(0.55))
-    .children(items);
+    .child(v_flex().id("stats-rail").w_full().flex_1().min_h(0).items_center().gap(8).py(4).overflow_y_scroll().children(items));
 }
 
 // ---------------------------------------------------------------------------
@@ -437,6 +443,7 @@ export function strip(ui) {
     .on_size_change((size, cx) => ui.act.resized(size, cx))
     .when(ui.stale && Boolean(r), (el) => el.opacity(0.55))
     .children(items)
+    .when(ui.fold, el => el.child(ui.fold))
     .child(iconButton(ui, "strip-menu", "more", "Show in… and readings", () => ui.act.menu()));
 }
 
@@ -759,6 +766,7 @@ export function dashboard(ui) {
         .child(svg(ICON("panel-left")).size(13))
         .child("Show in…"),
     )
+    .when(ui.fold, el => el.child(ui.fold))
     .when(Boolean(ui.overlay), (el) => el.child(iconButton(ui, "close", "x", "Close  esc", () => ui.act.close())));
   const left = ["cpu", "mem", "gpu", "net", "disk", "temp"];
   const right = ["terms", "procs"];
@@ -818,6 +826,7 @@ export function column(ui) {
         .child(div().text_size(11.5).font_medium().text_color(t.dim).child("System"))
         .when(Boolean(r?.host), (el) => el.child(div().min_w(0).truncate().text_size(10.5).text_color(t.dim).child(`· ${r.host}`)))
         .child(div().flex_1())
+        .when(ui.fold, el => el.child(ui.fold))
         .child(iconButton(ui, "open-dashboard", "expand", `Open the dashboard${ui.dashKey ? `  ${ui.dashKey}` : ""}`, () => ui.act.dashboard()))
         .child(iconButton(ui, "panel-menu", "more", "Show in… and readings", () => ui.act.menu())),
     )

@@ -27,7 +27,7 @@ so they don't jitter; labels in the UI font. Chart tracks are `foreground` at 9%
   its value in its own severity color ("CPU 82°  GPU 61°  SoC 56°  SSD 38°  Bat 37°", then a
   fan icon and "3.0k" while a fan spins), 10 px apart, as many as fit; the tooltip lists all. Busiest terminal: the program's icon, its name, "space › tab" in `dim`, its
   CPU. Lines that don't fit the height are left out from the end; the core row goes first.
-- **Rail** (under 150 px wide): per reading a 10.5 px figure, a 22×3 bar, a 9 px label.
+- **Rail** (under 150 px wide) shows a 13 px metric icon above each 10.5 px figure, with a 22×3 bar for readings that have a fraction. Hover for details.
 - **Strip** (status bar or tab bar, or under 64 px tall): right-aligned chips, 20 px tall, icon
   plus value (CPU also a 26×11 sparkline), 9 px apart, then a `⋯`. In the status bar it has the
   same `chrome` background and top `border` as Herdr's status line.
