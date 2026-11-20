@@ -2,7 +2,7 @@
 # Takes the README's pictures on a showcase stage, with the kit's shoot.sh, one scene of
 # showcase.sh after another, and leaves the stage on the main scene.
 #
-#   w=$(SHOWCASE_TFVPN=0 SHOWCASE_HOOK=$PWD/docs/demo/showcase.sh sh ~/workspace/herdr/herdr-showcase/stage.sh)
+#   w=$(SHOWCASE_VPN=0 SHOWCASE_HOOK=$PWD/docs/demo/showcase.sh sh ~/workspace/herdr/herdr-showcase/stage.sh)
 #   sleep 120                                  # the charts fill their width in two minutes
 #   sh docs/demo/showcase-shots.sh "$w"
 #   sh ~/workspace/herdr/herdr-showcase/stage.sh --down "$w"

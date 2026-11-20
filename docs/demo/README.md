@@ -39,13 +39,13 @@ and `BRIEF.md` explain it).
 ## Take them again
 
 ```sh
-w=$(SHOWCASE_TFVPN=0 SHOWCASE_HOOK=$PWD/docs/demo/showcase.sh sh ~/workspace/herdr/herdr-showcase/stage.sh)
+w=$(SHOWCASE_VPN=0 SHOWCASE_HOOK=$PWD/docs/demo/showcase.sh sh ~/workspace/herdr/herdr-showcase/stage.sh)
 sleep 120                               # the charts fill their width in two minutes
 sh docs/demo/showcase-shots.sh "$w"
 sh ~/workspace/herdr/herdr-showcase/stage.sh --down "$w"
 ```
 
-`SHOWCASE_TFVPN=0` because this README is public: the VPN switch stays out of the pictures.
+`SHOWCASE_VPN=0` because this README is public: the VPN switch stays out of the pictures.
 Run from the repository's root. The pictures are 3200 × 1942 (the window at 2x); the menu is a
 crop of its picture (`MENU_CROP`, in pixels: x,y,width,height). One scene at a time, to look
 before shooting:
