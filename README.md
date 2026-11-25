@@ -5,12 +5,14 @@
 A mod for the [Herdr](https://herdr.dev) desktop app: this machine's CPU, memory, GPU, network,
 disk and temperatures, drawn natively beside your terminals, and **which agent is using them**.
 
-![The Herdr window with two spaces, shop and api. A cargo release build fills the terminal. At the bottom of the left sidebar a System panel shows one line per reading: CPU with a history chart and a row of cells for the performance and efficiency cores, memory as a stacked bar, GPU, network in and out, the CPU, SoC, SSD and battery temperatures, and last the busiest terminal, Cargo in shop › build. The status bar repeats CPU, memory, GPU and network at its right end.](preview.png)
+![The Herdr window with the stats as the middle panel of the right sidebar, titled System · sams-macbook: the CPU with its history chart across the panel and a row of cells for the performance and efficiency cores, memory as a split bar of app, wired, compressed and free with its history below, the sensors from the CPU, SoC and SSD to the battery and the fastest fan, and the terminals by CPU, with Claude Code in shop › 1 first. The status bar ends with a line of the CPU chart and figure, memory and temperature. Around them: the Sessions sidebar on the left with the spaces of two machines, Local and studio; Claude Code speeding up the checkout page in the middle, under a header with its model, context and limits; the pull requests above the stats; and what's running below them, mostly under two notifications in the bottom right corner. Everything but the stats panel and the status bar is dimmed. The sessions are made up; the readings are the Mac's own.](preview.png)
+
+*Around it: the [Sessions sidebar](https://github.com/jeffarese/herdr-agents-sidebar) on the left, a pane header with the model and limits, [pull requests](https://github.com/jeffarese/herdr-prs) above the stats on the right with what's running below, and two notifications in the corner. Every session in it is made up.*
 
 Agents compile, test and index all day. When the fans spin up, the question isn't "how busy is
 the machine" but "**which of my terminals is it?**" herdr-stats answers that from Herdr itself:
 it knows which processes belong to which terminal, so CPU and memory roll up to
-*Cargo · shop › build* rather than to a PID. Click it and you're there.
+*Claude Code · shop › 1* rather than to a PID. Click it and you're there.
 
 This is an unofficial mod. It is not affiliated with Herdr.
 
@@ -56,7 +58,7 @@ The stats start hidden. **Show in…** (the button in the dashboard, or the `⋯
 lists the places your layout has room for. Each is a switch, and the same menu picks the
 readings, shared by every place.
 
-<p align="center"><img src="docs/media/menu.png" width="300" alt="The Show in… menu. Under Show system stats in: Left sidebar and Status bar are checked; Right sidebar, Tab bar and Floating drawer are not. Under Readings: CPU, Memory, GPU, Network, Sensors and Busiest terminal are checked, Disk is not. Last, Open dashboard with its key, ⌘⌥S."></p>
+<p align="center"><img src="docs/media/menu.png" width="300" alt="The Show in… menu. Under Show system stats in: Right sidebar and Status bar are checked; Left sidebar, Tab bar and Floating drawer are not. Under Readings: CPU, Memory, Sensors and Busiest terminal are checked; GPU, Network and Disk are not. Last, Open dashboard with its key, ⌘⌥S. Behind it, a little of a made-up agent's screen."></p>
 
 | Place | What you get |
 | --- | --- |
@@ -66,7 +68,7 @@ readings, shared by every place.
 | **Tab bar** | The same line at the end of the tab bar. |
 | **Floating drawer** | Figures peek from the window's edge; hover and the charts slide out. Drag it to any edge. |
 
-![The Herdr window with the stats in three other places: a line of figures at the right end of the tab bar; a right sidebar with the CPU history and cores, memory, GPU, network, sensors and the terminals ranked by CPU; and a drawer peeking from the bottom of the left edge with the CPU, memory, GPU, network and temperature figures stacked.](docs/media/places.png)
+![The Herdr window with the stats in four other places at once: a panel at the bottom of the left sidebar with CPU, its history and core cells, memory, the CPU, SoC, SSD and battery temperatures, and Claude Code in shop › 1 as the busiest terminal; the tab bar, shown above the pane, ending with a line of CPU, memory and temperature; the same line at the end of the status bar; and a drawer peeking from the right edge, over the pull requests, with the CPU, memory and temperature figures stacked. The Sessions sidebar, the agent's screen, the pull requests and what's running fill the rest, with two notifications in the corner. The sessions are made up.](docs/media/places.png)
 
 Herdr's own layouts are read-only, so on one of them your first pick makes a personal copy
 (`main-stats`) and switches to it; the menu says so before you click.
@@ -75,7 +77,7 @@ Herdr's own layouts are read-only, so on one of them your first pick makes a per
 
 **⌥⌘S**, or click any reading.
 
-![The dashboard over the Herdr window, titled System, studio, live. On the left: CPU with a two-minute history and every core, memory broken into app, wired, compressed, free and swap, GPU, network in and out, the disk, and sensors from the CPU to the fastest fan. On the right: the terminals by CPU, Cargo in shop › build first, then Claude Code in shop and Node in api, and below them the busiest processes.](docs/media/dashboard.png)
+![The dashboard over the Herdr window, titled System, sams-macbook, with its uptime, live. On the left: the CPU with its history and a cell for every performance and efficiency core, memory broken into app, wired, compressed, free and swap, GPU, network in and out, the disk, and the sensors from the CPU to the fastest fan. On the right: the terminals by CPU, Claude Code in shop › 1 first, then the other agents, servers and shells of the made-up spaces, and below them the busiest processes. Behind it: the Sessions sidebar, the agent's screen, the pull requests, the stats in the right sidebar and two notifications. The sessions are made up.](docs/media/dashboard.png)
 
 On the left, each reading with room to read it. On the right, every terminal on this computer
 by CPU, with its space and tab, and your busiest processes. `↑` `↓` and `⏎` (or a click) go to a
@@ -152,7 +154,7 @@ sampler and deletes the mod and its cache.
 npm test                    # the mod: views, placement, feed, installer (node, no Herdr needed)
 npm run test:sampler        # the sampler's own tests (cargo)
 scripts/build-sampler.sh    # release build, copied into mods/herdr-stats/bin
-sh docs/demo/record.sh      # take the README's pictures again, on a synthetic stage
+sh docs/demo/showcase-shots.sh <stage>   # take the README's pictures again (docs/demo/README.md)
 ```
 
 The mod is plain ES modules against Herdr's `gpui-kit` and `herdr` APIs; the tests run the
@@ -163,6 +165,16 @@ the pictures are made without anything personal in them. Changes are in
 
 The sensor code grew out of [herdr-stats](https://github.com/jeffarese/herdr-stats), the plugin
 for the herdr terminal multiplexer.
+
+## Works well with
+
+The pictures above are one Herdr window with these mods running together:
+
+- [Sessions sidebar](https://github.com/jeffarese/herdr-agents-sidebar): every agent and shell on all your machines in one sidebar, with sub-agents and background work.
+- [Pull requests](https://github.com/jeffarese/herdr-prs): your pull requests and the state of their checks, in a sidebar.
+- [Quick switcher](https://github.com/jeffarese/herdr-bar-mod): ⌘K to any agent, tab, pane or space on every machine.
+- [Mod hub](https://github.com/jeffarese/herdr-mod-hub): browse the gallery, read a mod's code before installing it, and manage your mods.
+- [Outside](https://github.com/jeffarese/herdr-outside): the agents and terminals herdr-core runs outside your spaces.
 
 ## License
 
